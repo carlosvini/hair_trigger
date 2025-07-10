@@ -1,4 +1,3 @@
-require 'ostruct'
 require 'fileutils'
 require 'active_record'
 require 'hair_trigger/base'
@@ -18,6 +17,8 @@ module HairTrigger
 
   class << self
     attr_writer :model_path, :schema_rb_path, :migration_path, :pg_schema
+
+    Migration = Struct.new(:name, :version, keyword_init: true)
 
     def configure
       yield hair_trigger_config
@@ -99,7 +100,7 @@ module HairTrigger
         base_triggers = MigrationReader.get_triggers(previous_schema, options)
         unless base_triggers.empty?
           version = (previous_schema =~ /ActiveRecord::Schema(\[\d\.\d\])?\.define\(version\: (.*)\)/) && $2.to_i
-          migrations.unshift [OpenStruct.new({:version => version}), base_triggers]
+          migrations.unshift [Migration.new({:version => version}), base_triggers]
         end
       end
 
